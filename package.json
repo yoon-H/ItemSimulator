@@ -1,0 +1,16 @@
+{
+  "name": "item-simulator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/yoon-H/ItemSimulator.git",
+  "author": "yoon-H <ucando0320@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "prisma": "^5.22.0"
+  }
+}
