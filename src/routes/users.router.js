@@ -4,10 +4,11 @@ import express from "express";
 import { prisma } from "../utils/prisma/index.js";
 import Joi from "joi";
 import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import authMiddleware from "../middlewares/auth.middleware.js";
 
-dotenv.config()
+dotenv.config();
 
 const SALT_ROUNDS = 10; // salt를 얼마나 복잡하게 만들지 결정(비밀번호 암호화)
 
@@ -110,12 +111,39 @@ router.post("/sign-in", async (req, res, next) => {
             userId: user.id,
         },
         process.env["ACCESS_TOKEN_SECRET_KEY"],
-        { expiresIn: '1h' }
+        { expiresIn: "1h" },
     );
 
     //Bearer 토큰 형식으로 JWT를 반환
-    res.setHeader('authorization', `Bearer ${token}`);
+    res.setHeader("authorization", `Bearer ${token}`);
     return res.status(200).json({ accessToken: `Bearer ${token}` });
 });
+
+// /** 사용자 조회 API **/
+// router.get("/", authMiddleware, async (req, res, next) => {
+//     const { id } = req.user;
+
+//     const user = await prisma.users.findFirst({
+//         where: { id },
+//         select: {
+//             id: true,
+//             name : true,
+//             createdAt: true,
+//             updatedAt: true,
+//             characters: {
+//                 // 1:1 관계를 맺고있는 Characters 테이블을 조회합니다.
+//                 select: {
+//                     userId: true,
+//                     name: true,
+//                     heath: true,
+//                     power: true,
+//                     money: true
+//                 },
+//             },
+//         },
+//     });
+
+//     return res.status(200).json({ data: user });
+// });
 
 export default router;
