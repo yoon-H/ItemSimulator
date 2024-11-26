@@ -4,6 +4,11 @@ import express from "express";
 import { prisma } from "../utils/prisma/index.js";
 import Joi from "joi";
 import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config()
+
 const SALT_ROUNDS = 10; // salt를 얼마나 복잡하게 만들지 결정(비밀번호 암호화)
 
 const router = express.Router();
@@ -85,6 +90,32 @@ router.post("/sign-up", async (req, res, next) => {
             updateAt: user.updatedAt,
         },
     });
+});
+
+router.post("/sign-in", async (req, res, next) => {
+    const { id, password } = req.body;
+    const user = await prisma.users.findFirst({ where: { id } });
+
+    if (!user)
+        return res.status(401).json({ message: "존재하지 않는 아이디입니다." });
+    // 입력받은 사용자의 비밀번호와 데이터베이스에 저장된 비밀번호 비교
+    else if (!(await bcrypt.compare(password, user.password)))
+        return res
+            .status(401)
+            .json({ message: "비밀번호가 일치하지 않습니다." });
+
+    // 로그인에 성공하면, 사용자의 userId를 바탕으로 토큰을 생성
+    const token = jwt.sign(
+        {
+            userId: user.id,
+        },
+        process.env["ACCESS_TOKEN_SECRET_KEY"],
+        { expiresIn: '1h' }
+    );
+
+    //Bearer 토큰 형식으로 JWT를 반환
+    res.setHeader('authorization', `Bearer ${token}`);
+    return res.status(200).json({ accessToken: `Bearer ${token}` });
 });
 
 export default router;
