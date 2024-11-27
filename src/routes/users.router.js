@@ -6,7 +6,6 @@ import Joi from "joi";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import authMiddleware from "../middlewares/auth.middleware.js";
 
 dotenv.config();
 
@@ -21,17 +20,20 @@ const idSchema = Joi.string()
 const passwordSchema = Joi.string().min(6).required();
 
 /** 사용자 회원가입 API **/
-router.post("/sign-up", async (req, res, next) => {
+router.post("/users/sign-up", async (req, res, next) => {
     //아이디, 비밀번호, 이름
     const { userId, password, confirmPassword, name } = req.body;
 
     //#region 아이디 유효성 검사
-    const idValidation = await idSchema.validateAsync(userId);
-
-    if (idValidation.error)
-        return res
-            .status(400)
-            .json({ errorMessage: "아이디 형식이 맞지 않습니다." });
+    try {
+        const idValidation = await idSchema.validateAsync(userId);
+    } catch (error) {
+        if (error.name === "ValidationError") {
+            return res
+                .status(400)
+                .json({ errorMessage: "아이디 형식이 맞지 않습니다." });
+        }
+    }
 
     // 아이디 중복 체크
     const isExistId = await prisma.users.findFirst({
@@ -46,12 +48,15 @@ router.post("/sign-up", async (req, res, next) => {
     //#endrigion
 
     //#region 비밀번호 유효성 검사
-    const passwordValidation = await passwordSchema.validateAsync(password);
-
-    if (passwordValidation.error)
-        return res
-            .status(400)
-            .json({ message: "비밀번호 형식이 맞지 않습니다." });
+    try {
+        const passwordValidation = await passwordSchema.validateAsync(password);
+    } catch (error) {
+        if (error.name === "ValidationError") {
+            return res
+                .status(400)
+                .json({ message: "비밀번호 형식이 맞지 않습니다." });
+        }
+    }
 
     if (password !== confirmPassword)
         return res
@@ -93,7 +98,7 @@ router.post("/sign-up", async (req, res, next) => {
     });
 });
 
-router.post("/sign-in", async (req, res, next) => {
+router.post("/users/sign-in", async (req, res, next) => {
     const { id, password } = req.body;
     const user = await prisma.users.findFirst({ where: { id } });
 
@@ -118,32 +123,5 @@ router.post("/sign-in", async (req, res, next) => {
     res.setHeader("authorization", `Bearer ${token}`);
     return res.status(200).json({ accessToken: `Bearer ${token}` });
 });
-
-// /** 사용자 조회 API **/
-// router.get("/", authMiddleware, async (req, res, next) => {
-//     const { id } = req.user;
-
-//     const user = await prisma.users.findFirst({
-//         where: { id },
-//         select: {
-//             id: true,
-//             name : true,
-//             createdAt: true,
-//             updatedAt: true,
-//             characters: {
-//                 // 1:1 관계를 맺고있는 Characters 테이블을 조회합니다.
-//                 select: {
-//                     userId: true,
-//                     name: true,
-//                     heath: true,
-//                     power: true,
-//                     money: true
-//                 },
-//             },
-//         },
-//     });
-
-//     return res.status(200).json({ data: user });
-// });
 
 export default router;
