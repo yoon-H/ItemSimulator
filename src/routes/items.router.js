@@ -179,4 +179,17 @@ router.patch("/items/:itemCode", async (req, res, next) => {
 });
 // #endregion
 
+// #region 아이템 목록 조회
+router.get('/items', async(req,res,next) => {
+    const items = await prisma.items.findMany({
+        select: {
+            itemCode: true,
+            name: true,
+            price: true,
+          },
+    });
+
+    return res.status(200).json(items);
+})
+
 export default router;
