@@ -47,9 +47,6 @@ router.post("/characters", authMiddleware, async (req, res, next) => {
         data: {
             userId: req.user.userId,
             name,
-            heath: DEFAULT_HP,
-            power: DEFAULT_POWER,
-            money: DEFAULT_MONEY,
         },
     });
 
@@ -99,15 +96,13 @@ router.get('/characters/:characterId',authMiddleware ,async (req, res, next) => 
     if(character.userId === req.user.userId) {
         return res.status(200).json({
             name : character.name,
-            health : character.heath,
-            power : character.power,
+            stat : character.stat,
             money : character.money
         });
     } else{
         return res.status(200).json({
             name : character.name,
-            health : character.heath,
-            power : character.power
+            stat : character.stat,
         });
     }
 
