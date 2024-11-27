@@ -191,5 +191,29 @@ router.get('/items', async(req,res,next) => {
 
     return res.status(200).json(items);
 })
+// #endregion
+
+// #region 아이템 상세 조회
+router.get('/items/:itemCode', async (req, res, next) => {
+    const {itemCode} = req.params;
+
+    if(!itemCode) return res.status(400).json({message : "아이템 코드를 입력해주세요."});
+
+    const item = await prisma.items.findFirst({
+        where : {
+            itemCode : +itemCode,
+        },
+        select : {
+            itemCode : true,
+            name : true,
+            stat : true,
+            price : true
+        }
+    })
+
+    if(!item) return res.status(400).json({message : "해당하는 아이템이 없습니다."});
+
+    return res.status(200).json(item);
+})
 
 export default router;
