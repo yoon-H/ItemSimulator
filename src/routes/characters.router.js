@@ -82,4 +82,35 @@ router.delete('/characters/:characterId', authMiddleware,async(req, res, next) =
     
 })
 
+router.get('/characters/:characterId',authMiddleware ,async (req, res, next) => {
+    const {characterId} = req.params;
+
+    if(!characterId) return res.status(400).json({message : "캐릭터 아이디를 입력해주세요."});
+
+    // Id로 캐릭터 찾기
+    const character = await prisma.characters.findFirst({
+        where: {
+            characterId : +characterId,
+        },
+    });
+
+    if(!character) return res.status(400).json({message : "캐릭터가 존재하지 않습니다."});
+
+    if(character.userId === req.user.userId) {
+        return res.status(200).json({
+            name : character.name,
+            health : character.heath,
+            power : character.power,
+            money : character.money
+        });
+    } else{
+        return res.status(200).json({
+            name : character.name,
+            health : character.heath,
+            power : character.power
+        });
+    }
+
+})
+
 export default router;
