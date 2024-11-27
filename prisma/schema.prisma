@@ -31,8 +31,8 @@ model Characters {
   characterId Int    @id @default(autoincrement()) @map("characterId")
   userId      Int    @map("userId")
   name        String @unique @map("name")
-  stat       Json     @default("{ \"health\": 500, \"power\" : 100 }") @map("stat")
-  money       Int    @map("money")
+  stat        Json   @default("{ \"health\": 500, \"power\" : 100 }") @map("stat")
+  money       Int    @default(10000) @map("money")
 
   user Users @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
