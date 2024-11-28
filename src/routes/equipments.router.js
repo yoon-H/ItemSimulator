@@ -118,7 +118,7 @@ router.post(
         //캐릭터 스탯 변경
         const newStat = {
             health: character.stat.health + item.stat.health,
-            power: character.stat.power + character.stat.power,
+            power: character.stat.power + item.stat.power,
         };
 
         await prisma.characters.update({
@@ -135,6 +135,7 @@ router.post(
 );
 // #endregion
 
+// #region 장착한 아이템 조회
 router.get("/equipments/:characterId", async (req, res, next) => {
     const { characterId } = req.params;
 
@@ -170,9 +171,137 @@ router.get("/equipments/:characterId", async (req, res, next) => {
         }
     })
 
-    if(!equipments) return res.status(200).json({message : "장착된 아이템이 없습니다."});
-
     return res.status(200).json(equipments);
 })
+// #endregion
+
+// #region 아이템 탈착
+router.delete(
+    "/equipments/:characterId",
+    authMiddleware,
+    async (req, res, next) => {
+        const { characterId } = req.params;
+        const { itemCode } = req.body;
+
+        // 캐릭터 검사
+        if (!characterId)
+            return res
+                .status(400)
+                .json({ message: "캐릭터 아이디를 입력해주세요." });
+
+        const character = await prisma.characters.findFirst({
+            where: {
+                characterId: +characterId,
+            },
+        });
+
+        if (!character)
+            return res
+                .status(400)
+                .json({ message: "캐릭터가 존재하지 않습니다." });
+
+        if (character.userId !== req.user.userId)
+            return res
+                .status(400)
+                .json({ message: "사용자의 캐릭터가 아닙니다." });
+
+        // 아이템 코드 유효성 검사
+        try {
+            await numberSchema.validateAsync(itemCode);
+        } catch (err) {
+            if (err.name === "ValidationError") {
+                return res
+                    .status(400)
+                    .json({
+                        errorMessage: "아이템 코드는 숫자로 입력해주세요.",
+                    });
+            }
+        }
+
+        //아이템 코드가 존재하나?
+        const item = await prisma.items.findFirst({
+            where: {
+                itemCode,
+            },
+        });
+
+        if (!item)
+            return res
+                .status(400)
+                .json({ message: "아이템이 존재하지 않습니다." });
+
+        //장착이 안 되어있나?
+        const isExistEquipment = await prisma.equipments.findFirst({
+            where: {
+                characterId: +characterId,
+                itemCode: itemCode,
+            },
+        });
+
+        if (!isExistEquipment)
+            return res
+                .status(400)
+                .json({ message: "장착되지 않은 아이템입니다." });
+
+        
+
+        // #region 아이템 탈착 실행
+
+        //
+        await prisma.equipments.delete({
+            where : {
+                equipmentId : isExistEquipment.equipmentId
+            }
+        });
+
+        //캐릭터 스탯 변경
+        const newStat = {
+            health: character.stat.health - item.stat.health,
+            power: character.stat.power - item.stat.power,
+        };
+
+        await prisma.characters.update({
+            where: {
+                characterId: +characterId,
+            },
+            data: {
+                stat: newStat
+            },
+        });
+
+        //인벤토리에 있니?
+        const isExistInven = await prisma.inventory.findFirst({
+            where: {
+                characterId: +characterId,
+                itemCode: itemCode,
+            },
+        });
+
+        // 있으면 +1, 없으면 생성
+        if (!isExistInven) {
+            await prisma.inventory.create({
+                data : {
+                    characterId: +characterId,
+                    itemCode,
+                    quantity: 1,
+                }
+            });
+        } else {
+            await prisma.inventory.update({
+                where: {
+                    invenId: isExistInven.invenId,
+                },
+                data: {
+                    quantity: isExistInven.quantity + 1,
+                },
+            });
+        }
+
+        // #endregion
+
+        return res.status(200).json({ message: "탈착에 성공했습니다." });
+    },
+);
+// #endregion
 
 export default router;
