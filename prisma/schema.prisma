@@ -54,6 +54,8 @@ model Items {
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
 
+  inventory Inventory[]
+
   @@map("Items")
 }
 
@@ -66,7 +68,9 @@ model Inventory {
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
 
-  character Characters @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+  characters Characters @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+  items      Items      @relation(fields: [itemCode], references: [itemCode], onDelete: Cascade)
 
+  @@unique([characterId, itemCode])
   @@map("Inventory")
 }
