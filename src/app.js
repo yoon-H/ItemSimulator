@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import UsersRouter from './routes/users.router.js';
 import CharacterRouter from './routes/characters.router.js';
 import ItemRouter from './routes/items.router.js';
+import ShopRouter from './routes/shop.router.js';
 
 const app = express();
 const PORT = 3018;
