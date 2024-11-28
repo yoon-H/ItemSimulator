@@ -113,9 +113,20 @@ router.post("/shop/:characterId", authMiddleware, async (req, res, next) => {
         });
     }
 
-    return res.status(200).json({ message: "성공적으로 구매되었습니다." });
+    const currentMoney = await prisma.characters.findFirst({
+        where: {
+            characterId: +characterId,
+        },
+        select: {
+            money : true,
+          },
+    });
+
+    return res.status(200).json({ message: "성공적으로 구매되었습니다." , currentMoney});
     // #endregion
 });
 //#endregion
+
+
 
 export default router;
