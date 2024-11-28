@@ -135,7 +135,8 @@ router.get("/:characterId/items", authMiddleware, async (req, res, next) => {
             itemCode : true,
             items : {
                 select : {
-                    name : true
+                    name : true,
+                    slot : true
                 }
             },
             quantity : true,
