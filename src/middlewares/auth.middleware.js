@@ -6,7 +6,6 @@ import { prisma } from "../utils/prisma/index.js";
 export default async function (req, res, next) {
     try {
         const accessToken = req.get('authorization');
-        console.log(accessToken);
         if (!accessToken) throw new Error("NotExist");
 
         const [tokenType, token] = accessToken.split(" ");
@@ -32,8 +31,6 @@ export default async function (req, res, next) {
 
         next();
     } catch (error) {
-        console.log(error.name);
-        console.log(error.message);
         // 토큰이 만료되었거나, 조작되었을 때, 에러 메시지를 다르게 출력합니다.
         switch (error.message) {
             case "NotExist":
