@@ -135,5 +135,44 @@ router.post(
 );
 // #endregion
 
+router.get("/equipments/:characterId", async (req, res, next) => {
+    const { characterId } = req.params;
+
+    // 캐릭터 검사
+    if (!characterId)
+        return res
+            .status(400)
+            .json({ message: "캐릭터 아이디를 입력해주세요." });
+
+    const character = await prisma.characters.findFirst({
+        where: {
+            characterId: +characterId,
+        },
+    });
+
+    if (!character)
+        return res
+            .status(400)
+            .json({ message: "캐릭터가 존재하지 않습니다." });
+
+
+    const equipments = await prisma.equipments.findMany({
+        where : {
+            characterId : +characterId
+        },
+        select :{
+            itemCode : true,
+            items : {
+                select : {
+                    name : true
+                }
+            }
+        }
+    })
+
+    if(!equipments) return res.status(200).json({message : "장착된 아이템이 없습니다."});
+
+    return res.status(200).json(equipments);
+})
 
 export default router;
