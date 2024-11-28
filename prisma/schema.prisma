@@ -40,8 +40,16 @@ model Characters {
   updatedAt DateTime @updatedAt @map("updatedAt")
 
   inventory Inventory[]
+  equipments Equipments[]
 
   @@map("Characters")
+}
+
+enum Slot {
+  ARMOR
+  WEAPON
+  RING
+  AMULET
 }
 
 model Items {
@@ -49,12 +57,14 @@ model Items {
   itemCode Int    @unique @map("itemCode")
   name     String @unique @map("name")
   stat     Json   @map("stat")
+  slot     Slot   @map("slot")
   price    Int    @map("price")
 
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
 
   inventory Inventory[]
+  equipments Equipments[]
 
   @@map("Items")
 }
@@ -73,4 +83,17 @@ model Inventory {
 
   @@unique([characterId, itemCode])
   @@map("Inventory")
+}
+
+model Equipments {
+  equipmentId Int  @id @default(autoincrement()) @map("equipmentId")
+  characterId Int  @map("characterId")
+  itemCode    Int  @map("itemCode")
+  slot        Slot @map("slot")
+
+  characters Characters @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+  items      Items      @relation(fields: [itemCode], references: [itemCode], onDelete: Cascade)
+
+  @@unique([characterId, slot])
+  @@map("Equipments")
 }
