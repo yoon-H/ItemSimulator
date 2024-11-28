@@ -265,4 +265,46 @@ router.delete("/shop/:characterId", authMiddleware, async (req, res, next) => {
 });
 //#endregion
 
+// #region 돈을 100원씩 벌어보자
+router.patch("/work/:characterId", authMiddleware ,async (req, res, next) => {
+    const { characterId } = req.params;
+
+    // #region 캐릭터 검사
+    if (!characterId)
+        return res
+            .status(400)
+            .json({ message: "캐릭터 아이디를 입력해주세요." });
+
+    const character = await prisma.characters.findFirst({
+        where: {
+            characterId: +characterId,
+        },
+    });
+
+    if (!character)
+        return res.status(400).json({ message: "캐릭터가 존재하지 않습니다." });
+
+    if (character.userId !== req.user.userId)
+        return res.status(400).json({ message: "사용자의 캐릭터가 아닙니다." });
+
+
+    const currentMoney = await prisma.characters.update({
+        where : {
+            characterId : +characterId
+        },
+        data : {
+            money : character.money + 100
+        },
+        select : {
+            money : true
+        }
+    })
+
+    return res.status(200).json({ message : "100원을 벌었다!", currentMoney});
+
+    // #endregion
+})
+
+// #endregion
+
 export default router;
