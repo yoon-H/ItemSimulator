@@ -39,6 +39,8 @@ model Characters {
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
 
+  inventory Inventory[]
+
   @@map("Characters")
 }
 
@@ -52,5 +54,23 @@ model Items {
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
 
+  inventory Inventory[]
+
   @@map("Items")
+}
+
+model Inventory {
+  invenId     Int @id @default(autoincrement()) @map("invenId")
+  characterId Int @map("characterId")
+  itemCode    Int @map("itemCode")
+  quantity    Int @map("quantity")
+
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+
+  characters Characters @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+  items      Items      @relation(fields: [itemCode], references: [itemCode], onDelete: Cascade)
+
+  @@unique([characterId, itemCode])
+  @@map("Inventory")
 }

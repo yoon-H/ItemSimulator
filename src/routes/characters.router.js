@@ -108,4 +108,42 @@ router.get('/characters/:characterId',authMiddleware ,async (req, res, next) => 
 
 })
 
+// 캐릭터 인벤토리 조회
+router.get("/:characterId/items", authMiddleware, async (req, res, next) => {
+    const {characterId} = req.params;
+
+    if(!characterId) return res.status(400).json({message : "캐릭터 아이디를 입력해주세요."});
+
+    // Id로 캐릭터 찾기
+    const character = await prisma.characters.findFirst({
+        where: {
+            characterId : +characterId,
+        },
+    });
+
+    if(!character) return res.status(400).json({message : "캐릭터가 존재하지 않습니다."});
+
+    if (character.userId !== req.user.userId)
+        return res.status(400).json({ message: "사용자의 캐릭터가 아닙니다." });
+
+    // 캐릭터Id로 인벤토리 찾기
+    const invenList = await prisma.inventory.findMany({
+        where: {
+            characterId : +characterId,
+        },
+        select: {
+            itemCode : true,
+            items : {
+                select : {
+                    name : true
+                }
+            },
+            quantity : true,
+        }
+    })
+
+    return res.status(200).json(invenList);
+
+})
+
 export default router;
