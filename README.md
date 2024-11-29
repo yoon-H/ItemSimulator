@@ -12,6 +12,16 @@ https://github.com/users/yoon-H/projects/3/views/2
 
 https://github.com/yoon-H/ItemSimulator/wiki/%EC%9A%94%EC%B2%AD-%EB%AA%A8%EC%9D%8C
 
+### 도전과제
+
+1. 아이템 구입 API
+2. 아이템 판매 API
+3. 캐릭터가 보유한 인벤토리 내 아이템 목록 조회 API
+4. 캐릭터가 장착한 아이템 목록 조회 API
+5. 아이템 장착 API
+6. 아이템 탈착 API
+7. 게임 머니를 버는 API
+
 ## 질문과 답변
 
 1. **암호화 방식**
