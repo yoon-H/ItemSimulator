@@ -8,6 +8,10 @@ https://github.com/yoon-H/ItemSimulator/wiki/Code-Convention
 
 https://github.com/users/yoon-H/projects/3/views/2
 
+## 요청 모음
+
+https://github.com/yoon-H/ItemSimulator/wiki/%EC%9A%94%EC%B2%AD-%EB%AA%A8%EC%9D%8C
+
 ## 질문과 답변
 
 1. **암호화 방식**
